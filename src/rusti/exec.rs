@@ -305,6 +305,7 @@ impl Write for SyncBuf {
 fn compile_input(input: Input, sysroot: PathBuf, libs: Vec<String>)
         -> Option<(llvm::ModuleRef, Deps)> {
     let r = monitor(move || {
+        driver::reset_thread_local_state();
         let opts = build_exec_options(sysroot, libs);
         let dep_graph = DepGraph::new(opts.build_dep_graph());
         let cstore = Rc::new(CStore::new(&dep_graph));
@@ -369,6 +370,7 @@ fn with_analysis<F, R>(f: F, input: Input, sysroot: PathBuf, libs: Vec<String>) 
         where F: Send + 'static, R: Send + 'static,
         F: for<'a, 'gcx, 'tcx> FnOnce(&Crate, &ty::TyCtxt<'a, 'gcx, 'tcx>, ty::CrateAnalysis) -> R {
     monitor(move || {
+        driver::reset_thread_local_state();
         let opts = build_exec_options(sysroot, libs);
         let dep_graph = DepGraph::new(opts.build_dep_graph());
         let cstore = Rc::new(CStore::new(&dep_graph));
